@@ -31,6 +31,30 @@ class LongitudinalAnalysis:
         self.metrics_by_round = {}
         self._plottable_metrics = []
     
+    
+    def get_data(self, metric: str, experiment: str, dataset):
+        if not metric in self.metrics:
+            print(f'metric: {metric} not found in dataset')
+            return None
+        met = self.metrics[metric].data
+        data = met.loc[met.experiment == experiment]
+        anis = sorted(data.animal.unique() )
+        days = sorted(data.day.unique() )
+
+        out = np.empty((len(anis), len(days)))
+        out[:,:] = np.nan
+
+        for i, ani in enumerate(anis):
+
+            ani_slice = data.loc[data.animal == ani]
+            for d in ani_slice.day.unique():
+                val = ani_slice.loc[ani_slice.day == d, 'value'].values[0]
+                
+                out[i,int(d-1)] = val
+        
+        return anis, days, out
+    
+    
     def plottable_metrics(self):
             return self._plottable_metrics
         
