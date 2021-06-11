@@ -25,7 +25,8 @@ def read_round_csv(filepath):
 class LongitudinalAnalysis:
     
     def __init__(self, experiment_name):
-        self.experiment = experiment_name
+        self.experiment_name = experiment_name
+        self.experiments = []
         self.metrics = {}
         self.metrics_by_round = {}
         self._plottable_metrics = []
@@ -49,6 +50,8 @@ class LongitudinalAnalysis:
         animal = df.loc[df.var_name == 'animal_ID', 'var'].values[0]
         experiment = df.loc[df.var_name == 'experiment', 'var'].values[0]
         day = df.loc[df.var_name == 'day', 'var'].values[0]
+        
+        self.experiments += [experiment]
         
         for var_n in df.var_name.unique():
             value = df.loc[df.var_name == var_n, 'var'].values[0]
