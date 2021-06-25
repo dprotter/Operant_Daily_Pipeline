@@ -107,12 +107,14 @@ class LongitudinalAnalysis:
             animal = head['animal']
             experiment = head['experiment']
             day = head['day']
-        
-            for var_n in df.var_name.unique():
-                value = df.loc[df.var_name == var_n, 'var'].values[0]
 
-                if var_n in self.metrics.keys():
-                    self.metrics[var_n].add_data(animal, day, value, file)
+            cols = [var for var in df.columns if var not in ['Unnamed: 0', 'Round']]
+            
+            for var_name in cols:
+                value_df = df[['Round', var_name]]
+
+                if var_name in self.metrics.keys():
+                    self.metrics[var_name].add_data(animal, day, value_df, file)
 
                 else:
                     value = df.loc[df.var_name == var_n, 'var'].values[0]
@@ -228,24 +230,36 @@ class DuplicateData(Exception):
     def __str__(self):
         return f'metric: {self.metric_name}\nday: {self.day}\nanimal: {self.ani}\nold value: {self.old_val}\nnew value passed: {self.new_val}\nold_file:{self.old_file}\nnew_file:{self.new_file}'
 
+class DuplicateRoundData(Exception):
+    """The day and animal that was passed to this Metric is already present."""
+    def __init__(self, metric_name, animal, exp, day, old_file, new_file):
+        self.metric_name = metric_name
+        self.old_file = old_file
+        self.new_file = new_file
+        self.ani = animal
+        self.day = day
+
+        self.message = ''
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f'metric: {self.metric_name}\nday: {self.day}\nanimal: {self.ani}\nold_file:{self.old_file}\nnew_file:{self.new_file}'
+
+
 class Metric_by_round:
     '''An object that '''
-    def __init__(self, name, var_desc, first_row):
+    def __init__(self, name, var_desc):
         self.name = name
         self.description = var_desc
-        self.data = pd.DataFrame(columns=['animal', 'day','round','value','file'])
+        self.data = {}
     
-    def add_data(self, animal_num, day, rnd, value, file):
-        anis = self.data.animal.unique()
-        days = self.data.day.unique()
+    def add_data(self, animal_num, experiment, day, df, file):
         
-        if animal_num in anis and day in days:
-            raise DuplicateData
-        
-        new_row = pd.DataFrame(data = {'animal':[animal_num],
-                                       'day':[day],
-                                       'round':[rnd],
-                                       'value':[value],
-                                       'file':[file]})
-        self.data = self.data.append(new_row)
-        self.data.sort_values(['animal','experiment','day'], inplace = True)
+        if day in self.data[animal_num][experiment].keys():
+            old_file = self.data[animal_num][experiment][day]['file']
+            raise DuplicateRoundData(self.name, animal_num, experiment, day, old_file, file)
+        else:
+            self.data[animal_num][experiment][day] = {}
+            self.data[animal_num][experiment][day]['values'] = df
+            self.data[animal_num][experiment][day]['file'] = file
+            
