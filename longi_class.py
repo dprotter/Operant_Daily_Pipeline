@@ -101,30 +101,30 @@ class LongitudinalAnalysis:
                 self.metrics[var_n] = new_metric
             self.set_plottable_metrics()
         
-        def add_by_round_csv(self, file):
+    def add_by_round_csv(self, file):
+        
+        head, df = read_round_csv(file)
+        
+        animal = head['vole']
+        experiment = head['experiment']
+        day = head['day']
+
+        cols = [var for var in df.columns if var not in ['Unnamed: 0', 'Round']]
+        
+        for var_name in cols:
+            value_df = df[['Round', var_name]]
             
-            head, df = read_round_csv(file)
-            animal = head['animal']
-            experiment = head['experiment']
-            day = head['day']
+            if var_name in self.metrics.keys():
+                self.metrics[var_name].add_data(animal, experiment, day, value_df, file)
 
-            cols = [var for var in df.columns if var not in ['Unnamed: 0', 'Round']]
-            
-            for var_name in cols:
-                value_df = df[['Round', var_name]]
+            else:
+                value = value_df = df[['Round', var_name]]
+                name = var_name
 
-                if var_name in self.metrics.keys():
-                    self.metrics[var_name].add_data(animal, day, value_df, file)
+                new_metric = Metric_by_round(name)
+                new_metric.add_data(animal, experiment, day, value_df, file)
 
-                else:
-                    value = df.loc[df.var_name == var_n, 'var'].values[0]
-                    name = var_n
-                    desc = df.loc[df.var_name == var_n, 'var_desc'].values[0]
-
-                    new_metric = Metric(name, desc)
-                    new_metric.add_data(animal, day, value)
-
-                    self.metrics[var_n] = new_metric
+                self.metrics[var_n] = new_metric            
         
         
         
@@ -248,9 +248,10 @@ class DuplicateRoundData(Exception):
 
 class Metric_by_round:
     '''An object that '''
-    def __init__(self, name, var_desc):
+    def __init__(self, name):
         self.name = name
-        self.description = var_desc
+        
+        #{ animal -> experiment -> day }
         self.data = {}
         self.animal_order = []
         
@@ -259,25 +260,21 @@ class Metric_by_round:
         
         animal_order = order if order else self.animal_order
         
-        if not animal and day:
+        if animal and day:
+            
+            out = self.data[ani][experiment][day]
+        
+        elif day:
             
             out = {ani:self.data[ani][experiment][day] for ani in animal_order}
         
-        elif not animal and not day:
-            out = {ani:{} for ani in animal_order}
-            for ani in animal_order:
-                for day in sorted(self.data[ani][experiment].keys()):
-                    out[ani][day] = self.data[ani][experiment][day]
-        
-        elif animal and not day:
+        elif animal:
             out = self.data[ani][experiment]
-        
+    
         else:
+            out = {ani:self.data[ani][experiment] for ani in animal_order}
             
-            
-        if animal and not day:
-            
-            return self.data[animal][experiment][day]
+        return out
             
     def add_data(self, animal_num, experiment, day, df, file):
         
