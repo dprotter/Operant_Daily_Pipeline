@@ -252,7 +252,33 @@ class Metric_by_round:
         self.name = name
         self.description = var_desc
         self.data = {}
+        self.animal_order = []
+        
     
+    def get_data(self, experiment, day = None, animal = None, order = None):
+        
+        animal_order = order if order else self.animal_order
+        
+        if not animal and day:
+            
+            out = {ani:self.data[ani][experiment][day] for ani in animal_order}
+        
+        elif not animal and not day:
+            out = {ani:{} for ani in animal_order}
+            for ani in animal_order:
+                for day in sorted(self.data[ani][experiment].keys()):
+                    out[ani][day] = self.data[ani][experiment][day]
+        
+        elif animal and not day:
+            out = self.data[ani][experiment]
+        
+        else:
+            
+            
+        if animal and not day:
+            
+            return self.data[animal][experiment][day]
+            
     def add_data(self, animal_num, experiment, day, df, file):
         
         if day in self.data[animal_num][experiment].keys():
@@ -262,4 +288,7 @@ class Metric_by_round:
             self.data[animal_num][experiment][day] = {}
             self.data[animal_num][experiment][day]['values'] = df
             self.data[animal_num][experiment][day]['file'] = file
+            
+        self.animal_order +=[animal_num]
+        self.animal_order = sorted(self.animal_order)
             
