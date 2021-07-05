@@ -113,18 +113,20 @@ class LongitudinalAnalysis:
         
         for var_name in cols:
             value_df = df[['Round', var_name]]
+            value_df.rename(columns = {var_name:'value'}, inplace = True)
             
             if var_name in self.metrics.keys():
                 self.metrics[var_name].add_data(animal, experiment, day, value_df, file)
 
             else:
-                value = value_df = df[['Round', var_name]]
+                value_df = df[['Round', var_name]]
+                value_df.rename(columns = {var_name:'value'}, inplace = True)
                 name = var_name
 
                 new_metric = Metric_by_round(name)
                 new_metric.add_data(animal, experiment, day, value_df, file)
 
-                self.metrics[var_n] = new_metric            
+                self.metrics[name] = new_metric            
         
         
         
@@ -262,14 +264,14 @@ class Metric_by_round:
         
         if animal and day:
             
-            out = self.data[ani][experiment][day]
+            out = self.data[animal][experiment][day]
         
         elif day:
             
             out = {ani:self.data[ani][experiment][day] for ani in animal_order}
         
         elif animal:
-            out = self.data[ani][experiment]
+            out = self.data[animal][experiment]
     
         else:
             out = {ani:self.data[ani][experiment] for ani in animal_order}
@@ -277,15 +279,40 @@ class Metric_by_round:
         return out
             
     def add_data(self, animal_num, experiment, day, df, file):
-        
-        if day in self.data[animal_num][experiment].keys():
-            old_file = self.data[animal_num][experiment][day]['file']
-            raise DuplicateRoundData(self.name, animal_num, experiment, day, old_file, file)
-        else:
-            self.data[animal_num][experiment][day] = {}
-            self.data[animal_num][experiment][day]['values'] = df
-            self.data[animal_num][experiment][day]['file'] = file
+        df['file'] = file
+        if animal_num in self.data.keys():
             
-        self.animal_order +=[animal_num]
-        self.animal_order = sorted(self.animal_order)
+            if experiment in self.data[animal_num].keys():
+                if day in self.data[animal_num][experiment].keys():
+                    old_file = self.data[animal_num][experiment][day]
+                    raise DuplicateRoundData(self.name, animal_num, experiment, day, old_file, file)
+                else:
+                    self.data[animal_num][experiment][day] = df
+            else:
+                #if we dont have this experiment yet, we must create a new heirarchy
+                #                  animal
+                #                     |
+                #                    ----
+                #                    |   |
+                #          experiment 1  experiment 2
+                #           |    |        |    |    |
+                #         day1  day2     day1 day2 day3
+                self.data[animal_num] = {experiment:{day:df}}
+                
+        else:
+            #if we dont have this animal yet, we must create a new heirarchy
+            #                  animal
+            #                     |
+            #                    ----
+            #                    |   |
+            #          experiment 1  experiment 2
+            #           |    |        |    |    |
+            #         day1  day2     day1 day2 day3
+            
+            self.data[animal_num]={experiment:{day:df}}
+            
+            #add new animal to the animal order to be used when fetching data
+            self.animal_order +=[animal_num]
+            self.animal_order = sorted(self.animal_order)
+        
             
