@@ -3,8 +3,8 @@ import traceback
 import sys
 import os
 
-import home_base.analysis_scripts.analysis_script_lookup as asl
-import home_base.analysis.analysis_functions as af
+import analysis_script_lookup as asl
+import analysis_functions as af
 
 def run_analysis_script(filepath, custom_script = None, output_loc = None):
     '''fpath of csv output from operant experiment. Can direct to a custom 

@@ -119,14 +119,16 @@ def run_analysis(data_raw, head, by_round_fname, summary_fname):
 ###
 
     d1_openings = af.count_event(data, oes.door1_open_start)
+    prop_d1_beambreak_by_open = d1_beambreaks / d1_openings if d1_openings else np.nan
     summary+= [['proportion of door_1 opening on which the beam was subsequently broken',
         'prop_d1_beambreak_by_open',
-            d1_beambreaks / d1_openings]]
+            prop_d1_beambreak_by_open]]
 
     d2_openings = af.count_event(data, oes.door2_open_start)
+    prop_d2_beambreak_by_open = d2_beambreaks / d2_openings if d2_openings else np.nan
     summary+= [['proportion of door_2 opening on which the beam was subsequently broken',
         'prop_d1_beambreak_by_open',
-            d2_beambreaks / d2_openings]]
+            prop_d2_beambreak_by_open]]
 
 ####
     d1_leverpress_beambreaks= af.count_contingent_events(data, oes.door1_leverpress_prod, oes.beam_break_1)

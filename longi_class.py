@@ -284,7 +284,7 @@ class Metric_by_round:
             
             if experiment in self.data[animal_num].keys():
                 if day in self.data[animal_num][experiment].keys():
-                    old_file = self.data[animal_num][experiment][day]
+                    old_file = self.data[animal_num][experiment][day]['file'].values[0]
                     raise DuplicateRoundData(self.name, animal_num, experiment, day, old_file, file)
                 else:
                     self.data[animal_num][experiment][day] = df
@@ -297,7 +297,7 @@ class Metric_by_round:
                 #          experiment 1  experiment 2
                 #           |    |        |    |    |
                 #         day1  day2     day1 day2 day3
-                self.data[animal_num] = {experiment:{day:df}}
+                self.data[animal_num][experiment] = {day:df}
                 
         else:
             #if we dont have this animal yet, we must create a new heirarchy

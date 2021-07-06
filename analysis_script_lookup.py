@@ -15,7 +15,7 @@ def script_lookup(experiment):
 def magazine():
     try:
         print('importing magazine analysis module')
-        import home_base.analysis_scripts.magazine_analysis as magazine
+        import magazine_analysis as magazine
     except:
         traceback.print_exc()
         print('couldnt import magazine analysis script')
@@ -24,7 +24,7 @@ def magazine():
 
 def autoshape():
     try:
-        import home_base.analysis_scripts.autoshape_analysis as autoshape
+        import autoshape_analysis as autoshape
     except:
         traceback.print_exc()
         print('couldnt import Autoshape analysis script')
@@ -34,7 +34,7 @@ def autoshape():
 def door_shape():
     try:
         print('importing door_shape analysis module')
-        import home_base.analysis_scripts.door_shape_analysis as door_shape
+        import door_shape_analysis as door_shape
     except:
         traceback.print_exc()
         print('couldnt import door_shape analysis script')
@@ -43,7 +43,7 @@ def door_shape():
     
 def door_test():
     try:
-        import home_base.analysis_scripts.door_test_analysis as door_test
+        import door_test_analysis as door_test
     except:
         traceback.print_exc()
         print('couldnt import door_test analysis script')
