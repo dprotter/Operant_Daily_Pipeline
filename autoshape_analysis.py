@@ -41,6 +41,15 @@ def run_analysis(data_raw, head, by_round_fname, summary_fname):
     #calculate number of presses
     total_presses = len(data.loc[data.Event == oes.food_leverpress_prod])
     summary += [['total number of lever presses', 'total_lever_press', total_presses]]
+    
+    non_presses = total_rounds - total_presses
+    summary += [['rounds without a press', 'non_press_rounds', non_presses]]
+    
+    prop_presses = total_presses/total_rounds
+    summary += [['proportion of rounds with a lever press', 'prop_presses_by_rounds', non_presses]]
+    
+    prop_non_presses = non_presses/total_rounds
+    summary += [['proportion of rounds without a lever press', 'prop_non_presses_by_rounds', prop_non_presses]]
 
     food_lever_press_prop_of_rounds = total_presses / total_rounds
     summary += [['proportion of rounds on which food lever was pressed', 
@@ -50,10 +59,18 @@ def run_analysis(data_raw, head, by_round_fname, summary_fname):
     summary+= [['mean food lever press latency (excludes NaN)',
             'mean_food_lever_press_latency',
                 round_df.food_lever_press_latency.mean()]]
+    
+    summary+= [['median food lever press latency (excludes NaN)',
+            'median_food_lever_press_latency',
+                round_df.food_lever_press_latency.median()]]
 
     summary+= [['mean pellet retrieval latency (excludes NaN)',
             'mean_pellet_latency',
                 round_df.pellet_latency.mean()]]
+    
+    summary+= [['median pellet retrieval latency (excludes NaN)',
+            'median_pellet_latency',
+                round_df.pellet_latency.median()]]
     
     pel_retrievals = af.count_event(data, oes.retr)
     summary+= [['number of times a pellet was retrieved',
@@ -63,6 +80,11 @@ def run_analysis(data_raw, head, by_round_fname, summary_fname):
     summary+= [['proportion of rounds when a pellet was retrieved',
             'proportion_round_pellet_retrieved',
                 pel_retrievals / total_rounds]]
+    
+    dispensed = af.count_event(data, oes.disp)
+    summary+= [['proportion of pellets retrieved',
+            'proportion_pellet_retrieved',
+                pel_retrievals / dispensed]]
     
     
     summary+= [['animal ID',

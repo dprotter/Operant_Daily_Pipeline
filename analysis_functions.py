@@ -254,13 +254,13 @@ def latency_to_beam_break(df):
     d1_col_name, round_df_d1 = latency_by_round_expect_unequal(df, 
                                               event_1 = oes.door1_open_start, 
                                               event_2 = oes.beam_break_1,
-                                              selected_by = oes.door1_open_start, 
+                                              selected_by = oes.beam_break_1, 
                                               new_col_name = 'latency_beam_break_door1')
 
     d2_col_name, round_df_d2 = latency_by_round_expect_unequal(df, 
                                               event_1 = oes.door2_open_start, 
                                               event_2 = oes.beam_break_2,
-                                              selected_by = oes.door2_open_start, 
+                                              selected_by = oes.beam_break_2, 
                                               new_col_name = 'latency_beam_break_door2')
     
     return {d1_col_name:round_df_d1, d2_col_name:round_df_d2}

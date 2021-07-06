@@ -30,6 +30,7 @@ class LongitudinalAnalysis:
         self.metrics = {}
         self.metrics_by_round = {}
         self._plottable_metrics = []
+        self.animal_order = None
     
     
     def get_data(self, metric: str, experiment: str, dataset):
@@ -38,7 +39,8 @@ class LongitudinalAnalysis:
             return None
         met = self.metrics[metric].data
         data = met.loc[met.experiment == experiment]
-        anis = sorted(data.animal.unique() )
+        
+        anis = self.animal_order if self.animal_order else sorted(data.animal.unique() )
         days = sorted(data.day.unique() )
 
         out = np.empty((len(anis), len(days)))
