@@ -220,28 +220,6 @@ def latency_by_round_v2(df, event_1, event_2,
 
     '''want to try and rewrite using pandas merge function'''
 
-    if get_rounds_from not in ('first', 'second'):
-        raise TypeError('get_rounds_from tells this function which event to use when noting the round corresponding to latency. Must be "first" or "second"')
-    
-    if not new_col_name:
-        new_col = f'latency_from_|{event_1}|_to_|{event_2}|'
-    else:
-        new_col = new_col_name
-    
-    '''new_df_blank = np.asarray([[r, np.nan] for r in df.Round.unique()])
-    new_df = pd.DataFrame(data = new_df_blank, columns = ['Round',new_col_name])'''
-    
-    if selected_by:
-        #choose the rounds where selected_by occurs
-        rounds = df.loc[df.Event == selected_by, 'Round'].unique()
-        
-        #only get rounds where selected_by has occured. dont use for events
-        #whose latencies cross a change in round!
-        sli_1 = df.loc[(df.Event == event_1)&(df.Round.isin(rounds))].copy()
-        sli_2 = df.loc[(df.Event == event_2)&(df.Round.isin(rounds))].copy()
-    else:
-        sli_1 = df.loc[(df.Event == event_1)].copy()
-        sli_2 = df.loc[(df.Event == event_2)].copy()
 
 
 
