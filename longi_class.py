@@ -91,8 +91,10 @@ class LongitudinalAnalysis:
                     metric.sort_data()
                 except:
                     print(f"\n\ncouldnt add data to {metric.name}:\n{new_row}\n\n")
-                    pass
+                    print(metric.data.info())
                     traceback.print_exc()
+                    
+                    
             else:
                 value = df.loc[df.var_name == var_n, 'var'].values[0]
                 name = var_n
@@ -160,9 +162,8 @@ class Metric:
     
     '''def add_data(self, animal_num, day, value, experiment, file):'''
     def add_data(self, new_row):
-        
         animal_num = new_row['animal'][0]
-        day = new_row['day'][0]
+        day = int(float(new_row['day'][0]))
         exp = new_row['experiment'][0]
         #check if this day is already occupied within this metric
         if len(self.data.loc[(self.data.animal == animal_num) & 
@@ -197,25 +198,15 @@ class Metric:
     def intuit_dtype(self, new_row):
         val = new_row.value.values[0]
         try:
-            b = int(val)
+            a = float(val)
+            return float
         except Exception as e:
             
-            try:
-                a = float(val)
-            except Exception as e:
+            return str
+        else:
+            if np.isnan(a): 
+                return float
                 
-                return str
-            else:
-                if np.isnan(a): 
-                    return float
-                
-                elif int(a) == a:
-                    return int
-                
-                else:
-                    return float
-        return int
-        
         
     
 class DuplicateData(Exception):
