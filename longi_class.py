@@ -73,11 +73,12 @@ class LongitudinalAnalysis:
 
     def add_summary_csv(self, file):
         head, df = read_summary_csv(file)
-        animal = df.loc[df.var_name == 'animal_ID', 'var'].values[0]
-        experiment = df.loc[df.var_name == 'experiment', 'var'].values[0]
-        day = df.loc[df.var_name == 'day', 'var'].values[0]
+        animal = int(float(head['vole']))
+        experiment = head['experiment']
+        day = int(float(head['day']))
         
-        self.experiments += [experiment]
+        if experiment not in self.experiments:
+            self.experiments += [experiment]
         
         for var_n in df.var_name.unique():
             value = df.loc[df.var_name == var_n, 'var'].values[0]
@@ -109,9 +110,9 @@ class LongitudinalAnalysis:
         
         head, df = read_round_csv(file)
         
-        animal = head['vole']
+        animal = int(float(head['vole']))
         experiment = head['experiment']
-        day = head['day']
+        day = int(float(head['day']))
 
         cols = [var for var in df.columns if var not in ['Unnamed: 0', 'Round']]
         
