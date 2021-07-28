@@ -6,7 +6,7 @@ import os
 import analysis_functions as af
 
 import traceback
-
+import pickle
 
 #longitudinal functions
 def read_summary_csv(filepath):
@@ -22,6 +22,8 @@ def read_round_csv(filepath):
     
     return head, df
 
+
+
 class LongitudinalAnalysis:
     
     def __init__(self, experiment_name):
@@ -31,7 +33,24 @@ class LongitudinalAnalysis:
         self.metrics_by_round = {}
         self._plottable_metrics = []
         self.animal_order = None
+        self.files = []
     
+    def save(self,filepath, overwrite = True):
+        if os.path.exists(filepath):
+            if overwrite:
+                print('this path exists and will be overwritten.')
+                with open(filepath, 'wb') as f:
+                    pickle.dump(self, filepath)
+            else:
+                print('file already exists, and overwrite set to false. nothing saved.')
+        else:
+            with open(filepath, 'wb') as f:
+                    pickle.dump(self, f)
+                    
+    def open(self, filepath):
+        if os.path.exists(filepath):
+            with open(filepath, 'rb') as f:
+                self = pickle.load(f)
     
     def get_data(self, metric: str, experiment: str, dataset, days:list = None):
         
@@ -110,6 +129,7 @@ class LongitudinalAnalysis:
                 
                 self.metrics[var_n] = new_metric
             self.set_plottable_metrics()
+            self.files +=[file]
         
     def add_by_round_csv(self, file):
         
@@ -137,7 +157,7 @@ class LongitudinalAnalysis:
                 new_metric.add_data(animal, experiment, day, value_df, file)
 
                 self.metrics[name] = new_metric            
-        
+        self.files +=[file]
         
         
         
