@@ -4,23 +4,10 @@ import numpy as np
 import os
 
 import analysis_functions as af
-
+import longitudinal_functions as lf
 import traceback
+import pickle
 
-
-#longitudinal functions
-def read_summary_csv(filepath):
-    head = af.get_header(filepath, skiplines = 0)
-    df = pd.read_csv(filepath, header = 1)
-    df.set_index('Unnamed: 0', inplace = True)
-    return head, df.transpose()
-    
-    
-def read_round_csv(filepath):
-    head = af.get_header(filepath, skiplines = 0)
-    df = pd.read_csv(filepath, header = 1)
-    
-    return head, df
 
 class LongitudinalAnalysis:
     
@@ -31,30 +18,26 @@ class LongitudinalAnalysis:
         self.metrics_by_round = {}
         self._plottable_metrics = []
         self.animal_order = None
+        self.files = []
+    
+    def save(self,filepath, overwrite = True):
+        if os.path.exists(filepath):
+            if overwrite:
+                print('this path exists and will be overwritten.')
+                with open(filepath, 'wb') as f:
+                    pickle.dump(self, filepath)
+            else:
+                print('file already exists, and overwrite set to false. nothing saved.')
+        else:
+            with open(filepath, 'wb') as f:
+                    pickle.dump(self, f)
+                    
+    def open(self, filepath):
+        if os.path.exists(filepath):
+            with open(filepath, 'rb') as f:
+                self = pickle.load(f)
     
     
-    def get_data(self, metric: str, experiment: str, dataset):
-        if not metric in self.metrics:
-            print(f'metric: {metric} not found in dataset')
-            return None
-        met = self.metrics[metric].data
-        data = met.loc[met.experiment == experiment]
-        
-        anis = self.animal_order if self.animal_order else sorted(data.animal.unique() )
-        days = sorted(data.day.unique() )
-
-        out = np.empty((len(anis), len(days)))
-        out[:,:] = np.nan
-
-        for i, ani in enumerate(anis):
-
-            ani_slice = data.loc[data.animal == ani]
-            for d in ani_slice.day.unique():
-                val = ani_slice.loc[ani_slice.day == d, 'value'].values[0]
-                
-                out[i,int(d-1)] = val
-        
-        return anis, days, out
     
     
     def plottable_metrics(self):
@@ -72,7 +55,7 @@ class LongitudinalAnalysis:
                 continue
 
     def add_summary_csv(self, file):
-        head, df = read_summary_csv(file)
+        head, df = lf.read_summary_csv(file)
         animal = int(float(head['vole']))
         experiment = head['experiment']
         day = int(float(head['day']))
@@ -101,14 +84,15 @@ class LongitudinalAnalysis:
                 name = var_n
                 desc = df.loc[df.var_name == var_n, 'var_desc'].values[0]
                 
-                new_metric = Metric(name, desc,new_row)
+                new_metric = Metric(name, desc, new_row)
                 
                 self.metrics[var_n] = new_metric
             self.set_plottable_metrics()
+            self.files +=[file]
         
     def add_by_round_csv(self, file):
         
-        head, df = read_round_csv(file)
+        head, df = lf.read_round_csv(file)
         
         animal = int(float(head['vole']))
         experiment = head['experiment']
@@ -132,7 +116,7 @@ class LongitudinalAnalysis:
                 new_metric.add_data(animal, experiment, day, value_df, file)
 
                 self.metrics[name] = new_metric            
-        
+        self.files +=[file]
         
         
         
@@ -159,7 +143,7 @@ class Metric:
             
         else:
             self.plottable = False
-            print(f"{self.name} is {self.data_type} and plottable:{self.plottable}")
+             
     
     '''def add_data(self, animal_num, day, value, experiment, file):'''
     def add_data(self, new_row):
@@ -197,16 +181,19 @@ class Metric:
         self.data.sort_values(['animal','experiment','day'], inplace = True)
     
     def intuit_dtype(self, new_row):
+        dtype = new_row.value.dtype
         val = new_row.value.values[0]
-        try:
-            a = float(val)
-            return float
-        except Exception as e:
-            
-            return str
-        else:
-            if np.isnan(a): 
+        if isinstance(dtype, str) or dtype == 'O':
+            try:
+                a = float(val)
                 return float
+            except Exception as e:
+                
+                return str
+            if np.isnan(a):
+                return float
+        else:
+            return dtype
                 
         
     
