@@ -72,6 +72,8 @@ class LongitudinalAnalysis:
         for i, ani in enumerate(anis):
 
             ani_slice = data.loc[data.animal == ani]
+            
+            ##can I iterate directly over days?
             for d in ani_slice.day.unique():
                 if d in days:
                     val = ani_slice.loc[ani_slice.day == d, 'value'].values[0]
@@ -125,7 +127,7 @@ class LongitudinalAnalysis:
                 name = var_n
                 desc = df.loc[df.var_name == var_n, 'var_desc'].values[0]
                 
-                new_metric = Metric(name, desc,new_row)
+                new_metric = Metric(name, desc, new_row)
                 
                 self.metrics[var_n] = new_metric
             self.set_plottable_metrics()
@@ -184,7 +186,7 @@ class Metric:
             
         else:
             self.plottable = False
-            print(f"{self.name} is {self.data_type} and plottable:{self.plottable}")
+             
     
     '''def add_data(self, animal_num, day, value, experiment, file):'''
     def add_data(self, new_row):
@@ -222,16 +224,19 @@ class Metric:
         self.data.sort_values(['animal','experiment','day'], inplace = True)
     
     def intuit_dtype(self, new_row):
+        dtype = new_row.value.dtype
         val = new_row.value.values[0]
-        try:
-            a = float(val)
-            return float
-        except Exception as e:
-            
-            return str
-        else:
-            if np.isnan(a): 
+        if isinstance(dtype, str) or dtype == 'O':
+            try:
+                a = float(val)
                 return float
+            except Exception as e:
+                
+                return str
+            if np.isnan(a):
+                return float
+        else:
+            return dtype
                 
         
     
