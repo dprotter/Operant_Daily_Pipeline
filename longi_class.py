@@ -4,24 +4,9 @@ import numpy as np
 import os
 
 import analysis_functions as af
-
+import longitudinal_functions as lf
 import traceback
 import pickle
-
-#longitudinal functions
-def read_summary_csv(filepath):
-    head = af.get_header(filepath, skiplines = 0)
-    df = pd.read_csv(filepath, header = 1)
-    df.set_index('Unnamed: 0', inplace = True)
-    return head, df.transpose()
-    
-    
-def read_round_csv(filepath):
-    head = af.get_header(filepath, skiplines = 0)
-    df = pd.read_csv(filepath, header = 1)
-    
-    return head, df
-
 
 
 class LongitudinalAnalysis:
@@ -52,35 +37,7 @@ class LongitudinalAnalysis:
             with open(filepath, 'rb') as f:
                 self = pickle.load(f)
     
-    def get_data(self, metric: str, experiment: str, dataset, days:list = None):
-        
-        
-        if not metric in self.metrics:
-            print(f'metric: {metric} not found in dataset')
-            return None
-        met = self.metrics[metric].data
-        data = met.loc[met.experiment == experiment]
-        
-        anis = self.animal_order if self.animal_order else sorted(data.animal.unique() )
-        
-        if days == None:
-            days = sorted(data.day.unique() )
-
-        out = np.empty((len(anis), len(days)))
-        out[:,:] = np.nan
-
-        for i, ani in enumerate(anis):
-
-            ani_slice = data.loc[data.animal == ani]
-            
-            ##can I iterate directly over days?
-            for d in ani_slice.day.unique():
-                if d in days:
-                    val = ani_slice.loc[ani_slice.day == d, 'value'].values[0]
-                    
-                    out[i,int(d-1)] = val
-                    
-        return anis, days, out
+    
     
     
     def plottable_metrics(self):
@@ -98,7 +55,7 @@ class LongitudinalAnalysis:
                 continue
 
     def add_summary_csv(self, file):
-        head, df = read_summary_csv(file)
+        head, df = lf.read_summary_csv(file)
         animal = int(float(head['vole']))
         experiment = head['experiment']
         day = int(float(head['day']))
@@ -135,7 +92,7 @@ class LongitudinalAnalysis:
         
     def add_by_round_csv(self, file):
         
-        head, df = read_round_csv(file)
+        head, df = lf.read_round_csv(file)
         
         animal = int(float(head['vole']))
         experiment = head['experiment']
