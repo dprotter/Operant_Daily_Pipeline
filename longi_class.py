@@ -25,7 +25,7 @@ class LongitudinalAnalysis:
             if overwrite:
                 print('this path exists and will be overwritten.')
                 with open(filepath, 'wb') as f:
-                    pickle.dump(self, filepath)
+                    pickle.dump(self, f)
             else:
                 print('file already exists, and overwrite set to false. nothing saved.')
         else:
@@ -35,8 +35,10 @@ class LongitudinalAnalysis:
     def open(self, filepath):
         if os.path.exists(filepath):
             with open(filepath, 'rb') as f:
-                self = pickle.load(f)
-    
+                return pickle.load(f)
+        else:
+            raise FileNotFoundError
+
     
     
     
@@ -88,6 +90,7 @@ class LongitudinalAnalysis:
                 
                 self.metrics[var_n] = new_metric
             self.set_plottable_metrics()
+        if file not in self.files:
             self.files +=[file]
         
     def add_by_round_csv(self, file):
@@ -115,8 +118,10 @@ class LongitudinalAnalysis:
                 new_metric = Metric_by_round(name)
                 new_metric.add_data(animal, experiment, day, value_df, file)
 
-                self.metrics[name] = new_metric            
-        self.files +=[file]
+                self.metrics[name] = new_metric 
+                           
+        if file not in self.files:
+            self.files +=[file]
         
         
         
@@ -190,8 +195,8 @@ class Metric:
             except Exception as e:
                 
                 return str
-            if np.isnan(a):
-                return float
+        elif np.isnan(a):
+            return float
         else:
             return dtype
                 
