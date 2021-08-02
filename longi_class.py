@@ -57,41 +57,45 @@ class LongitudinalAnalysis:
                 continue
 
     def add_summary_csv(self, file):
-        head, df = lf.read_summary_csv(file)
-        animal = int(float(head['vole']))
-        experiment = head['experiment']
-        day = int(float(head['day']))
         
-        if experiment not in self.experiments:
-            self.experiments += [experiment]
-        
-        for var_n in df.var_name.unique():
-            value = df.loc[df.var_name == var_n, 'var'].values[0]
-            new_row = {'animal':[animal], 'day':[day], 'value':[value],
-                      'experiment':[experiment], 'file':[file]}
-            if var_n in self.metrics.keys():
-                metric = self.metrics[var_n]
-                
-                try:
-                    metric.add_data(new_row)
-                    metric.sort_data()
-                except:
-                    print(f"\n\ncouldnt add data to {metric.name}:\n{new_row}\n\n")
-                    print(metric.data.info())
-                    traceback.print_exc()
-                    
-                    
-            else:
+        try:
+            head, df = lf.read_summary_csv(file)
+            animal = int(float(head['vole']))
+            experiment = head['experiment']
+            day = int(float(head['day']))
+        except:
+            print(f'could not add {file}, due to:\n{traceback.format_exc()}')
+        else:
+            if experiment not in self.experiments:
+                self.experiments += [experiment]
+            
+            for var_n in df.var_name.unique():
                 value = df.loc[df.var_name == var_n, 'var'].values[0]
-                name = var_n
-                desc = df.loc[df.var_name == var_n, 'var_desc'].values[0]
-                
-                new_metric = Metric(name, desc, new_row)
-                
-                self.metrics[var_n] = new_metric
-            self.set_plottable_metrics()
-        if file not in self.files:
-            self.files +=[file]
+                new_row = {'animal':[animal], 'day':[day], 'value':[value],
+                        'experiment':[experiment], 'file':[file]}
+                if var_n in self.metrics.keys():
+                    metric = self.metrics[var_n]
+                    
+                    try:
+                        metric.add_data(new_row)
+                        metric.sort_data()
+                    except:
+                        print(f"\n\ncouldnt add data to {metric.name}:\n{new_row}\n\n")
+                        print(metric.data.info())
+                        traceback.print_exc()
+                        
+                        
+                else:
+                    value = df.loc[df.var_name == var_n, 'var'].values[0]
+                    name = var_n
+                    desc = df.loc[df.var_name == var_n, 'var_desc'].values[0]
+                    
+                    new_metric = Metric(name, desc, new_row)
+                    
+                    self.metrics[var_n] = new_metric
+                self.set_plottable_metrics()
+            if file not in self.files:
+                self.files +=[file]
         
     def add_by_round_csv(self, file):
         
@@ -193,9 +197,8 @@ class Metric:
                 a = float(val)
                 return float
             except Exception as e:
-                
                 return str
-        elif np.isnan(a):
+        elif np.isnan(val):
             return float
         else:
             return dtype
