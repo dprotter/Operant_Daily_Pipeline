@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import matplotlib.colors as mcolors
+import random
 
 def heatmap(data, row_labels, col_labels, ax=None,
             cbar_kw={}, cbarlabel="", **kwargs):
@@ -180,3 +181,10 @@ def make_heatmap(data, animals, days, title: str = 'no title',
     ax.set_title(title)
     
     return ax
+
+def random_jitter_x_values(center:float, number:int , width = 0.5):
+    '''return a list with randomly jittered x coordinates. 
+    center = x value the distribution should be centered on
+    number = number of samples
+    width  = width to be covered by distribution'''
+    return [(width - random.random())/2 + center for _ in range(number)]
