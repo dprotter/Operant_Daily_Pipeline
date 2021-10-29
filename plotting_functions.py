@@ -168,7 +168,7 @@ def get_continuous_cmap(hex_list, float_list=None):
 
 def make_heatmap(data, animals, days, title: str = 'no title', 
                 cmap = 'YlGn', cbarlabel: str = 'no label', ax = None,
-                val_floor: float = 0, val_ceil: float = 1.0, threshold = None):
+                val_floor: float = 0, val_ceil: float = 1.0, threshold = None, valfmt = "{x:.2f}"):
     if not ax:
         fig, ax = plt.subplots()
 
@@ -177,7 +177,7 @@ def make_heatmap(data, animals, days, title: str = 'no title',
                     vmax = val_ceil)
     
     threshold = threshold if threshold else val_ceil/2
-    texts = annotate_heatmap(im, valfmt="{x:.2f}", threshold = threshold)
+    texts = annotate_heatmap(im, valfmt=valfmt, threshold = threshold)
     ax.set_title(title)
     
     return ax
