@@ -81,7 +81,6 @@ class LongitudinalAnalysis:
                         metric.sort_data()
                     except:
                         print(f"\n\ncouldnt add data to {metric.name}:\n{new_row}\n\n")
-                        print(metric.data.info())
                         traceback.print_exc()
                         
                         
@@ -207,7 +206,7 @@ class Metric:
     
 class DuplicateData(Exception):
     """The day and animal that was passed to this Metric is already present."""
-    def __init__(self, metric_name, animal, day, old_val, new_val, old_file, new_file):
+    def __init__(self, metric_name, animal, day, old_val, new_val, old_file, new_file, experiment):
         self.metric_name = metric_name
         self.old_file = old_file
         self.new_file = new_file
@@ -215,11 +214,12 @@ class DuplicateData(Exception):
         self.day = day
         self.old_val = old_val
         self.new_val = new_val
+        self.experiment = experiment
         self.message = ''
         super().__init__(self.message)
 
     def __str__(self):
-        return f'metric: {self.metric_name}\nday: {self.day}\nanimal: {self.ani}\nold value: {self.old_val}\nnew value passed: {self.new_val}\nold_file:{self.old_file}\nnew_file:{self.new_file}'
+        return f'metric: {self.metric_name}\nexperiment: {self.experiment}\nday: {self.day}\nanimal: {self.ani}\nold value: {self.old_val}\nnew value passed: {self.new_val}\nold_file:{self.old_file}\nnew_file:{self.new_file}'
 
 class DuplicateRoundData(Exception):
     """The day and animal that was passed to this Metric is already present."""
